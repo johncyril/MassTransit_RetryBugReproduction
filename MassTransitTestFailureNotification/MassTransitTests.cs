@@ -50,14 +50,17 @@ namespace MassTransitTestFailureNotification
             }
             finally
             {
-                TestUtilities.DeleteSubscription(typeof(ITestEvent), exceptionConsumer.ServiceSubscriptionName);
+                TestUtilities.WaitUntilConditionMetOrTimedOut(() => -1 > 0);                           
 
                 //Assert
                 foreach (var bus in container.Resolve<IEnumerable<IMessageBus>>())
                 {
                     bus.Stop();
                 }
+
+                TestUtilities.DeleteSubscription(typeof(ITestEvent), exceptionConsumer.ServiceSubscriptionName); mockEmailService.Verify(x => x.Send(It.IsAny<string>()), Times.Once);
                 mockEmailService.Verify(x => x.Send(It.IsAny<string>()), Times.Once);
+                Assert.True(container.Resolve<IList<string>>().Count > int.Parse(ConfigurationManager.AppSettings[RetryConfigConstants.ServiceBusRetryCount]));
             }
         }
 
@@ -104,11 +107,13 @@ namespace MassTransitTestFailureNotification
                     bus.Stop();
                 }
 
+                TestUtilities.DeleteSubscription(typeof(ITestEvent), exceptionConsumer.ServiceSubscriptionName);
+
                 //verify number of times consumer was called.
                 var callsMade = container.Resolve<IList<string>>();
                 Assert.Equal(int.Parse(ConfigurationManager.AppSettings[RetryConfigConstants.ServiceBusRetryCount]) + 1, callsMade.Count);
 
-                TestUtilities.DeleteSubscription(typeof(ITestEvent), exceptionConsumer.ServiceSubscriptionName);
+                
             }
         }
     }

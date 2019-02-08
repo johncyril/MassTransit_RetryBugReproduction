@@ -42,7 +42,7 @@ namespace MassTransitTestFailureNotification.Consuming
             builder.Register(context =>
                 BusFactory.CreateBusAndRegisterSubscriber<TContract>(ServiceBusPath,
                     ServiceSubscriptionName, context)).As<IMessageBus>().OnlyIf(x =>
-                x.IsRegistered(new TypedService(typeof(TConsumer)))).SingleInstance();
+                x.IsRegistered(new TypedService(typeof(TConsumer)))).InstancePerLifetimeScope();
         }
     }
 }

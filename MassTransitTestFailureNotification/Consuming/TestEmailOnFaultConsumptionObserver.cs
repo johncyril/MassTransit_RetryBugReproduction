@@ -40,11 +40,7 @@ namespace MassTransitTestFailureNotification.Consuming
         /// <returns></returns>
         public Task ConsumeFault<T>(ConsumeContext<T> context, Exception exception) where T : class
         {
-            if (context.GetRetryCount() >= int.Parse(ConfigurationManager.AppSettings[RetryConfigConstants.ServiceBusRetryCount]))
-            {
-                NotifyFault(new FaultContext<T>(context, exception));
-            }
-
+            NotifyFault(new FaultContext<T>(context, exception));
             return Task.CompletedTask;
         }
     }

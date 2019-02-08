@@ -53,13 +53,12 @@ namespace MassTransitTestFailureNotification
                         var host = ConfigureServiceBus(servicePath, sbc);
                         sbc.SubscriptionEndpoint<T>(host, subscriptionName, ec =>
                         {
+                            ec.UseMessageRetry(x => x.Interval(int.Parse(ConfigurationManager.AppSettings[RetryConfigConstants.ServiceBusRetryCount]), TimeSpan.FromMilliseconds(double.Parse(ConfigurationManager.AppSettings[RetryConfigConstants.ServiceBusRetryInterval]))));
                             ec.Consumer<EventConsumer<T>>(context);
                             if (timeToLive != default(TimeSpan))
                             {
                                 ec.AutoDeleteOnIdle = timeToLive;
-                            }
-
-                            sbc.UseMessageRetry(x => x.Interval(int.Parse(ConfigurationManager.AppSettings[RetryConfigConstants.ServiceBusRetryCount]),TimeSpan.FromMilliseconds(double.Parse(ConfigurationManager.AppSettings[RetryConfigConstants.ServiceBusRetryInterval]))));
+                            }                           
                         });
                     })
             };
